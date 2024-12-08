@@ -16,19 +16,11 @@ import {
 } from "@mui/material";
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_SERVER);
 
-const QuestionGame = () => {
+const QuestionGame = ({ username }) => {
   const [isGameActive, setIsGameActive] = useState(false);
   const [question, setQuestion] = useState("คำถาม");
   const [answer, setAnswer] = useState("");
   const [answers, setAnswers] = useState([]);
-  const [username, setUsername] = useState("");
-
-  useEffect(() => {
-    const savedUsername = localStorage.getItem("username");
-    if (savedUsername) {
-      setUsername(savedUsername);
-    }
-  }, []);
 
   useEffect(() => {
     socket.on("gameStarted", (question) => {
@@ -108,29 +100,24 @@ const QuestionGame = () => {
                       key={index}
                       sx={{
                         mb: 1,
-                        border: "1px solid",
                         borderColor: "divider",
                         borderRadius: 2,
                       }}
                     >
                       <ListItemAvatar>
                         <Avatar
-                          sx={{ bgcolor: "primary.main", color: "white" }}
+                          sx={{
+                            backgroundImage:
+                              "linear-gradient(to right, #1e3a8a, #3b82f6)",
+                            color: "white",
+                          }}
                         >
                           {index + 1}
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
-                        primary={
-                          <Typography variant="subtitle1" fontWeight="bold">
-                            ชื่อ: {answer.username}
-                          </Typography>
-                        }
-                        secondary={
-                          <Typography variant="body" color="text.secondary">
-                            คำตอบ: {answer.answer}
-                          </Typography>
-                        }
+                        primary={answer.username}
+                        secondary={answer.answer}
                       />
                     </ListItem>
                   ))

@@ -8,36 +8,32 @@ import {
   List,
   ListItem,
   ListItemText,
-  Paper,
   ListItemAvatar,
   Avatar,
-  Toolbar,
-  IconButton,
-  Drawer,
   Stack,
-  Divider,
   Grid,
   Card,
   Chip,
+  Divider,
+  Tab,
+  Tabs,
 } from "@mui/material";
-import ImageIcon from "@mui/icons-material/Image";
-import AppBar from "@mui/material/AppBar";
-import MenuIcon from "@mui/icons-material/Menu";
-import CloseIcon from "@mui/icons-material/Close";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import Head from "next/head";
+import Layout from "@/components/Layout";
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_SERVER);
 
 const AdminPage = () => {
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
-  const toggleDrawer = (open) => () => {
-    setIsDrawerOpen(open);
-  };
-
   const [question, setQuestion] = useState("");
   const [answers, setAnswers] = useState([]);
   const [isGameActive, setIsGameActive] = useState(false);
   const [users, setUsers] = useState([]);
+  const [tabIndex, setTabIndex] = useState(0);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState("");
   useEffect(() => {
     socket.on("answerReceived", (data) => {
       setAnswers((prev) => [...prev, data]);
@@ -52,24 +48,27 @@ const AdminPage = () => {
 
   const handleStartGame = () => {
     if (!question.trim()) {
-      alert("Please enter a valid question.");
+      setAlertSeverity("error");
+      setAlertMessage("โปรดกรอกคำถามที่ถูกต้อง");
+      setAlertOpen(true);
       return;
     }
     socket.emit("startGame", question);
     setQuestion("");
     setIsGameActive(true);
     setAnswers([]);
-  };
 
-  const handleLogout = () => {
-    localStorage.removeItem("username");
-    setUsername("");
-    setIsLoggedIn(false);
-    setIsDrawerOpen(false);
+    setAlertSeverity("success");
+    setAlertMessage("ส่งคำถามเรียบร้อยแล้ว");
+    setAlertOpen(true);
   };
 
   const handleStartGameMemory = () => {
     socket.emit("startGameMemory");
+  };
+  const handleTabChange = (event, newValue) => {
+    socket.emit("gameActive", newValue);
+    setTabIndex(newValue);
   };
 
   return (
@@ -80,250 +79,184 @@ const AdminPage = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <AppBar
-        component="nav"
-        sx={{ backgroundImage: "linear-gradient(to right, #1e3a8a, #3b82f6)" }}
-      >
-        <Toolbar
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
+      <Layout username={"Admin"} users={users}>
+        <Grid
+          container
+          spacing={1}
+          display={"flex"}
+          justifyContent={"center"}
+          alignContent={"center"}
         >
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: "bold",
-              color: "white",
-            }}
-          >
-            FITS Game
-          </Typography>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <Typography variant="body1" sx={{ marginRight: 2, color: "white" }}>
-              Welcome, Admin
-            </Typography>
-            <Box sx={{ xs: "block", md: "none" }}>
-              <IconButton color="inherit" onClick={toggleDrawer(true)}>
-                <MenuIcon />
-              </IconButton>
-            </Box>
-          </div>
-        </Toolbar>
-      </AppBar>
-      <Box p={4}>
-        <Toolbar />
-        <Grid container display={"flex"} justifyContent={"center"} spacing={2}>
-          <Grid item xs={12} md={12}>
+          <Grid item xs={12} md={8}>
             <Card
               elevation={1}
               sx={{
                 padding: "16px",
                 marginBottom: "24px",
-                display: "flex",
-                justifyContent: "space-between",
               }}
             >
-              <Typography variant="body" gutterBottom sx={{}}>
-                แผงควบคุมผู้ดูแลระบบเกม
-              </Typography>
               <Stack
-                display={"flex"}
-                justifyContent={"space-between"}
                 direction={"row"}
-                spacing={1}
+                sx={{ display: "flex", justifyContent: "space-between" }}
               >
-                <Chip
-                  label={`${users.length} ออนไลน์`}
-                  variant="outlined"
-                  sx={{
-                    color: "white",
-                    backgroundImage:
-                      "linear-gradient(to right, #72BF78, #15B392)",
-                  }}
-                />
-              </Stack>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            {/* <Typography variant="h6" gutterBottom>
-              แผงผู้ดูแลระบบ
-            </Typography> */}
-
-            <Card
-              elevation={1}
-              style={{ padding: "16px", marginBottom: "24px" }}
-            >
-              <Typography variant="h6" gutterBottom>
-                ส่งคำถามใหม่
-              </Typography>
-              <TextField
-                label="ระบุคำถาม"
-                fullWidth
-                variant="outlined"
-                size="small"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-              />
-              <Box mt={2}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={handleStartGame}
-                  sx={{
-                    backgroundImage:
-                      "linear-gradient(to right, #1e3a8a, #3b82f6)",
-                  }}
+                <Typography variant="body" gutterBottom sx={{}}>
+                  แผงควบคุมผู้ดูแลระบบเกม
+                </Typography>
+                <Stack
+                  display={"flex"}
+                  justifyContent={"space-between"}
+                  direction={"row"}
+                  spacing={1}
                 >
-                  ส่ง
-                </Button>
-              </Box>
-            </Card>
-            {/* <Card sx={{ p: 2 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={handleStartGameMemory}
-                sx={{
-                  backgroundImage:
-                    "linear-gradient(to right, #1e3a8a, #3b82f6)",
-                }}
-              >
-                เริ่มเกมส์ทดสอบความจำ
-              </Button>
-            </Card> */}
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Card
-              elevation={1}
-              style={{ padding: "16px", marginBottom: "24px" }}
-            >
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={handleStartGameMemory}
-                sx={{
-                  backgroundImage:
-                    "linear-gradient(to right, #1e3a8a, #3b82f6)",
-                }}
-              >
-                เริ่มเกมส์ทดสอบความจำ
-              </Button>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={12}>
-            {/* <Card
-              elevation={1}
-              style={{ padding: "16px", marginBottom: "24px" }}
-            > */}
-            <Typography variant="body" gutterBottom>
-              คำตอบของผู้เล่น
-            </Typography>
-            <Card elevation={1} style={{ padding: "16px" }}>
-              <List>
-                {answers.length > 0 ? (
-                  answers.map((answer, index) => (
-                    <ListItem key={index}>
-                      <ListItemAvatar>
-                        <Avatar
+                  <Chip
+                    label={`${users.length} ออนไลน์`}
+                    variant="outlined"
+                    sx={{
+                      color: "white",
+                      backgroundImage:
+                        "linear-gradient(to right, #72BF78, #15B392)",
+                    }}
+                  />
+                </Stack>
+              </Stack>
+              <Divider sx={{ mt: 1, mb: 1 }} />
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={12}>
+                  <Grid item xs={12}>
+                    <Tabs
+                      value={tabIndex}
+                      onChange={handleTabChange}
+                      indicatorColor="primary"
+                      textColor="primary"
+                    >
+                      <Tab
+                        sx={{ textTransform: "none" }}
+                        label="เกมส์ตอบคำถาม"
+                      />
+                      <Tab
+                        sx={{ textTransform: "none" }}
+                        label="เกมส์ทดสอบความจำ"
+                      />
+                    </Tabs>
+                  </Grid>
+                </Grid>
+                {tabIndex === 0 && (
+                  <>
+                    <Grid item xs={12} md={12}>
+                      <Card
+                        elevation={1}
+                        style={{ padding: "16px", marginBottom: "24px" }}
+                      >
+                        <Typography variant="h6" gutterBottom>
+                          ส่งคำถามใหม่
+                        </Typography>
+                        <TextField
+                          label="ระบุคำถาม"
+                          fullWidth
+                          variant="outlined"
+                          size="small"
+                          value={question}
+                          onChange={(e) => setQuestion(e.target.value)}
+                        />
+                        <Box mt={2}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={handleStartGame}
+                            sx={{
+                              backgroundImage:
+                                "linear-gradient(to right, #1e3a8a, #3b82f6)",
+                            }}
+                          >
+                            ส่ง
+                          </Button>
+                        </Box>
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} md={12}>
+                      <Typography variant="body" gutterBottom>
+                        คำตอบของผู้เล่น
+                      </Typography>
+                      <Card elevation={1} style={{ padding: "16px" }}>
+                        <List>
+                          {answers.length > 0 ? (
+                            answers.map((answer, index) => (
+                              <ListItem key={index}>
+                                <ListItemAvatar>
+                                  <Avatar
+                                    sx={{
+                                      backgroundImage:
+                                        "linear-gradient(to right, #1e3a8a, #3b82f6)",
+                                      color: "white",
+                                    }}
+                                  >
+                                    {index + 1}
+                                  </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText
+                                  primary={`${answer.username}`}
+                                  secondary={`${answer.answer}`}
+                                />
+                              </ListItem>
+                            ))
+                          ) : (
+                            <Typography> ยังไม่ได้รับคำตอบ.</Typography>
+                          )}
+                        </List>
+                      </Card>
+                    </Grid>
+                  </>
+                )}
+
+                {tabIndex === 1 && (
+                  <>
+                    <Grid item xs={12} md={6}>
+                      <Card
+                        elevation={1}
+                        style={{ padding: "16px", marginBottom: "24px" }}
+                      >
+                        <Typography variant="h6" gutterBottom>
+                          กดเพื่อเริ่มเกมส์ทันที
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={handleStartGameMemory}
                           sx={{
                             backgroundImage:
                               "linear-gradient(to right, #1e3a8a, #3b82f6)",
-                            color: "white",
                           }}
                         >
-                          {index + 1}
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={`${answer.username}`}
-                        secondary={`${answer.answer}`}
-                      />
-                    </ListItem>
-                  ))
-                ) : (
-                  <Typography> ยังไม่ได้รับคำตอบ.</Typography>
+                          เริ่มเกมส์ทดสอบความจำ
+                        </Button>
+                      </Card>
+                    </Grid>
+                  </>
                 )}
-              </List>
+              </Grid>
             </Card>
-            {/* </Card> */}
           </Grid>
         </Grid>
-      </Box>
-      <Drawer anchor="right" open={isDrawerOpen} onClose={toggleDrawer(false)}>
-        <Box
-          sx={{
-            width: 300,
-            padding: 2,
-            backgroundColor: "background.paper",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-          }}
+      </Layout>
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={6000}
+        onClose={() => setAlertOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          anchor
+          vertical="top"
+          onClose={() => setAlertOpen(false)}
+          severity={alertSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
         >
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ marginBottom: 2 }}
-          >
-            <Typography variant="h6">Online Users ({users.length})</Typography>
-            <IconButton color="inherit" onClick={toggleDrawer(false)}>
-              <CloseIcon />
-            </IconButton>
-          </Stack>
-
-          <Divider sx={{ marginBottom: 2 }} />
-
-          <List sx={{ flexGrow: 1 }}>
-            {users.length > 0 ? (
-              users.map((user, index) => (
-                <ListItem
-                  key={index}
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                >
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      backgroundColor: "green",
-                    }}
-                  />
-                  <ListItemText primary={user} />
-                </ListItem>
-              ))
-            ) : (
-              <Typography
-                variant="body2"
-                color="textSecondary"
-                sx={{ textAlign: "center" }}
-              >
-                No users online
-              </Typography>
-            )}
-          </List>
-
-          <Divider sx={{ marginTop: 2 }} />
-
-          <Button
-            variant="contained"
-            fullWidth
-            sx={{
-              marginTop: 2,
-              backgroundImage: "linear-gradient(to right, #1e3a8a, #3b82f6)",
-            }}
-            onClick={handleLogout}
-          >
-            ออกจากระบบ
-          </Button>
-        </Box>
-      </Drawer>
+          {alertMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
