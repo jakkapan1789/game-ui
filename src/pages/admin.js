@@ -18,6 +18,7 @@ import {
   Divider,
   Grid,
   Card,
+  Chip,
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import AppBar from "@mui/material/AppBar";
@@ -67,6 +68,10 @@ const AdminPage = () => {
     setIsDrawerOpen(false);
   };
 
+  const handleStartGameMemory = () => {
+    socket.emit("startGameMemory");
+  };
+
   return (
     <>
       <Head>
@@ -109,11 +114,43 @@ const AdminPage = () => {
       </AppBar>
       <Box p={4}>
         <Toolbar />
-        <Grid container display={"flex"} justifyContent={"center"}>
+        <Grid container display={"flex"} justifyContent={"center"} spacing={2}>
+          <Grid item xs={12} md={12}>
+            <Card
+              elevation={1}
+              sx={{
+                padding: "16px",
+                marginBottom: "24px",
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography variant="body" gutterBottom sx={{}}>
+                แผงควบคุมผู้ดูแลระบบเกม
+              </Typography>
+              <Stack
+                display={"flex"}
+                justifyContent={"space-between"}
+                direction={"row"}
+                spacing={1}
+              >
+                <Chip
+                  label={`${users.length} ออนไลน์`}
+                  variant="outlined"
+                  sx={{
+                    color: "white",
+                    backgroundImage:
+                      "linear-gradient(to right, #72BF78, #15B392)",
+                  }}
+                />
+              </Stack>
+            </Card>
+          </Grid>
+
           <Grid item xs={12} md={6}>
-            <Typography variant="h6" gutterBottom>
+            {/* <Typography variant="h6" gutterBottom>
               แผงผู้ดูแลระบบ
-            </Typography>
+            </Typography> */}
 
             <Card
               elevation={1}
@@ -145,8 +182,46 @@ const AdminPage = () => {
                 </Button>
               </Box>
             </Card>
-
-            <Typography variant="h5" gutterBottom>
+            {/* <Card sx={{ p: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={handleStartGameMemory}
+                sx={{
+                  backgroundImage:
+                    "linear-gradient(to right, #1e3a8a, #3b82f6)",
+                }}
+              >
+                เริ่มเกมส์ทดสอบความจำ
+              </Button>
+            </Card> */}
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card
+              elevation={1}
+              style={{ padding: "16px", marginBottom: "24px" }}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={handleStartGameMemory}
+                sx={{
+                  backgroundImage:
+                    "linear-gradient(to right, #1e3a8a, #3b82f6)",
+                }}
+              >
+                เริ่มเกมส์ทดสอบความจำ
+              </Button>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={12}>
+            {/* <Card
+              elevation={1}
+              style={{ padding: "16px", marginBottom: "24px" }}
+            > */}
+            <Typography variant="body" gutterBottom>
               คำตอบของผู้เล่น
             </Typography>
             <Card elevation={1} style={{ padding: "16px" }}>
@@ -176,6 +251,7 @@ const AdminPage = () => {
                 )}
               </List>
             </Card>
+            {/* </Card> */}
           </Grid>
         </Grid>
       </Box>

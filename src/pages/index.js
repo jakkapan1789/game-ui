@@ -16,6 +16,9 @@ import { Stack, TextField, ListItem, Card, Grid } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Head from "next/head";
 import { io } from "socket.io-client";
+import MemoryGame from "@/components/MemoryGame";
+import WordGuessingGame from "@/components/WordGuessingGame";
+import ChatRoom from "@/components/ChatRoom";
 
 import QuestionGame from "@/components/QuestionGame";
 
@@ -217,7 +220,8 @@ export default function App() {
 
       <Box key={refreshKey} component="main" sx={{ p: 3 }}>
         <Toolbar />
-        <QuestionGame key={refreshKey} />
+        {/* <QuestionGame key={refreshKey} /> */}
+        <MemoryGame username={username} />
       </Box>
 
       <Drawer anchor="right" open={isDrawerOpen} onClose={toggleDrawer(false)}>
