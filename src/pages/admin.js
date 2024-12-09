@@ -34,7 +34,10 @@ const AdminPage = () => {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("");
+
+  const [adminSocket, setAdminSocket] = React.useState(null);
   useEffect(() => {
+    setAdminSocket(socket);
     socket.on("answerReceived", (data) => {
       setAnswers((prev) => [...prev, data]);
     });
@@ -45,6 +48,12 @@ const AdminPage = () => {
       socket.off("answerReceived");
     };
   }, []);
+
+  React.useEffect(() => {
+    if (socket) {
+      socket.emit("login", "Admin");
+    }
+  }, [socket]);
 
   const handleStartGame = () => {
     if (!question.trim()) {
@@ -65,6 +74,9 @@ const AdminPage = () => {
 
   const handleStartGameMemory = () => {
     socket.emit("startGameMemory");
+    setAlertSeverity("success");
+    setAlertMessage("เกมส์เริ่มแล้ว");
+    setAlertOpen(true);
   };
   const handleTabChange = (event, newValue) => {
     socket.emit("gameActive", newValue);
