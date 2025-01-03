@@ -5,7 +5,7 @@ const nextConfig = {
     return [
       {
         source: "/",
-        destination: "/play",
+        destination: "/tasks",
         permanent: true, // Indicates that the redirect is permanent
       },
     ];

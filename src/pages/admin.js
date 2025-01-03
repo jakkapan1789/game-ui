@@ -21,7 +21,7 @@ import {
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Head from "next/head";
-import Layout from "@/components/Layout";
+import Layout from "@/components/Layout/Layout";
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_SERVER);
 

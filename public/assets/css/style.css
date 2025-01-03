@@ -12,11 +12,16 @@ html, body {
     margin: 0;
     padding: 0;
     /* scroll-behavior: smooth; */
-    overflow: "hidden",
+    overflow: "hidden";
+    background-color: white;
+
+    
+    
   }
   #root {
     height: 100%;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    background-color: white;
   }
