@@ -47,7 +47,7 @@ export default function Layout({ username, users, children }) {
               color: "white",
             }}
           >
-            FITS Game
+            App Game
           </Typography>
           <div style={{ display: "flex", alignItems: "center" }}>
             <Typography variant="body1" sx={{ marginRight: 2, color: "white" }}>

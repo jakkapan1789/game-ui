@@ -157,7 +157,7 @@ const MemoryGame = ({ username }) => {
     >
       <Grid container spacing={2} justifyContent="center">
         {cards.map((card) => (
-          <Grid item xs={4} sm={3} md={2} key={card.id}>
+          <Grid item xs={3} sm={3} md={2} key={card.id}>
             <Card
               sx={{
                 p: 2,

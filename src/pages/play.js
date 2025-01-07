@@ -52,8 +52,9 @@ function App() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout username={username} users={users}>
-        {gameOnline === 0 && <QuestionGame username={username} />}
-        {gameOnline === 1 && <MemoryGame username={username} />}
+        {/* {gameOnline === 0 && <QuestionGame username={username} />}
+        {gameOnline === 1 && <MemoryGame username={username} />} */}
+        <MemoryGame username={username} />
       </Layout>
     </React.Fragment>
   );
