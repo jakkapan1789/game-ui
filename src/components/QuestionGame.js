@@ -64,6 +64,8 @@ const QuestionGame = ({ username }) => {
                   size="small"
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
+                  onPaste={(e) => e.preventDefault()}
+                  onCopy={(e) => e.preventDefault()}
                 />
                 <Button
                   onClick={handleSubmitAnswer}
