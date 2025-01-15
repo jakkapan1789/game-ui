@@ -57,7 +57,7 @@ export default function App() {
               color: "transparent",
             }}
           >
-            Welcome to FITS Game
+            Welcome to Apple Game
           </Typography>
           <form onSubmit={handleLogin}>
             <TextField
