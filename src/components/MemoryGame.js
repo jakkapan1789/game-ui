@@ -4,12 +4,10 @@ import {
   Box,
   Card,
   CardMedia,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Typography,
-  Button,
+  Dialog,
+  DialogContent,
+  Stack,
 } from "@mui/material";
 import { io } from "socket.io-client";
 import confetti from "canvas-confetti";
@@ -36,19 +34,23 @@ const MemoryGame = ({ username }) => {
   const [flippedCards, setFlippedCards] = useState([]);
   const [isChecking, setIsChecking] = useState(false);
   const [moves, setMoves] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [dialogEmoji, setDialogEmoji] = useState("");
+
   const initializeGame = (gameState) => {
     setCards(gameState.cards);
     setFlippedCards([]);
     setMoves(0);
     setGameComplete(false);
+    setGameStarted(true);
   };
 
   useEffect(() => {
     socket.on("gameStartedMemory", (gameState) => {
+      console.log("gameState", gameState);
       initializeGame(gameState);
       setDialogOpen(false);
     });
@@ -58,22 +60,11 @@ const MemoryGame = ({ username }) => {
 
       if (username === winner) {
         setDialogEmoji("🥳");
-        setDialogMessage(`ขอแสดงความยินดี!คุณชนะแล้ว!`);
-        const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-        (async () => {
-          const delays = [300, 700, 4500];
-          for (let i = 0; i < delays.length; i++) {
-            fireConfigurations.forEach((config) => {
-              fire(config.ratio, config.options);
-            });
-            if (i < delays.length - 1) {
-              await delay(delays[i]);
-            }
-          }
-        })();
+        setDialogMessage("ขอแสดงความยินดี! คุณชนะแล้ว!");
+        fireConfetti();
       } else {
         setDialogEmoji("😢");
-        setDialogMessage(`เสียใจด้วยคุณแพ้แล้ว`);
+        setDialogMessage("เสียใจด้วย คุณแพ้แล้ว");
       }
 
       setDialogOpen(true);
@@ -84,6 +75,17 @@ const MemoryGame = ({ username }) => {
       socket.off("gameCompletedMemory");
     };
   }, []);
+
+  const fireConfetti = async () => {
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const delays = [300, 700, 4500];
+    for (let i = 0; i < delays.length; i++) {
+      fireConfigurations.forEach((config) => {
+        fire(config.ratio, config.options);
+      });
+      if (i < delays.length - 1) await delay(delays[i]);
+    }
+  };
 
   const fire = (particleRatio, opts) => {
     confetti({
@@ -145,55 +147,101 @@ const MemoryGame = ({ username }) => {
     }
   };
 
+  // ─────────────────────────────────────────────
+  // Layout (fullscreen centered, no scroll)
+  // ─────────────────────────────────────────────
   return (
     <Box
       sx={{
-        minHeight: "80vh",
+        height: "calc(100vh - 64px)",
+        width: "100%",
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
         justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        overflow: "hidden",
+        px: 2,
+        bgcolor: "background.default",
       }}
     >
-      <Grid container spacing={2} justifyContent="center">
-        {cards.map((card) => (
-          <Grid item xs={3} sm={3} md={2} key={card.id}>
-            <Card
-              sx={{
-                p: 2,
-                aspectRatio: "1",
-                backgroundColor:
-                  card.isFlipped || card.isMatched ? "#fff" : "#ddd",
-                boxShadow:
-                  card.isFlipped || card.isMatched
-                    ? "0px 4px 10px rgba(0,0,0,0.2)"
-                    : "none",
-                transformStyle: "preserve-3d",
-                transition: "transform 0.5s",
-                transform:
-                  flippedCards.includes(card.id) || card.isMatched
-                    ? "rotateY(180deg)"
-                    : "",
-              }}
-              onClick={() => handleCardClick(card.id)}
-            >
-              {card.isFlipped || card.isMatched ? (
+      {/* ──────────────────────────────── */}
+      {/* 🟡 Standby (รอ Admin เริ่มเกม) */}
+      {/* ──────────────────────────────── */}
+      {!gameStarted && (
+        <Stack
+          spacing={2}
+          alignItems="center"
+          justifyContent="center"
+          sx={{
+            textAlign: "center",
+            color: "text.secondary",
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold" color="text.primary">
+            เกมส์ทดสอบความจำ
+          </Typography>
+          <Typography variant="h5" fontWeight="bold" color="text.primary">
+            🕹️ รอผู้ดูแลเริ่มเกม
+          </Typography>
+          <Typography variant="body1">
+            เมื่อผู้ดูแลเริ่มเกม หน้านี้จะโหลดอัตโนมัติ
+          </Typography>
+        </Stack>
+      )}
+
+      {/* ──────────────────────────────── */}
+      {/* 🟩 Memory Game Board */}
+      {/* ──────────────────────────────── */}
+      {gameStarted && (
+        <Grid
+          container
+          spacing={2}
+          justifyContent="center"
+          alignItems="center"
+          sx={{
+            maxWidth: 600,
+            overflow: "hidden",
+          }}
+        >
+          {cards.map((card) => (
+            <Grid item xs={3} sm={3} md={2} key={card.id}>
+              <Card
+                sx={{
+                  p: 1,
+                  aspectRatio: "1",
+                  backgroundColor:
+                    card.isFlipped || card.isMatched ? "#fff" : "#dbeafe",
+                  boxShadow:
+                    card.isFlipped || card.isMatched
+                      ? "0px 4px 10px rgba(0,0,0,0.2)"
+                      : "none",
+                  cursor: "pointer",
+                  transition: "transform 0.3s",
+                  transform:
+                    flippedCards.includes(card.id) || card.isMatched
+                      ? "rotateY(180deg)"
+                      : "",
+                }}
+                onClick={() => handleCardClick(card.id)}
+              >
                 <CardMedia
                   component="img"
-                  image={card.emoji}
-                  alt="Card Emoji"
+                  image={
+                    card.isFlipped || card.isMatched
+                      ? card.emoji
+                      : "/images/question.png"
+                  }
+                  alt="Card"
                 />
-              ) : (
-                <CardMedia
-                  component="img"
-                  image="/images/question.png"
-                  alt="Card Back"
-                />
-              )}
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
+      {/* ──────────────────────────────── */}
+      {/* 🏆 Dialog Winner / Loser */}
+      {/* ──────────────────────────────── */}
       <Dialog
         open={dialogOpen}
         maxWidth="xs"

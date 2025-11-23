@@ -11,262 +11,487 @@ import {
   ListItemAvatar,
   Avatar,
   Stack,
-  Grid,
   Card,
   Chip,
   Divider,
   Tab,
   Tabs,
+  Snackbar,
+  Alert,
+  Grid,
+  MenuItem,
 } from "@mui/material";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 import Head from "next/head";
 import Layout from "@/components/Layout";
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_SERVER);
 
+// รายการโลโก้ให้แอดมินเลือก
+const LOGO_OPTIONS = [
+  "Apple",
+  "Starbuck",
+  "7-Elevent",
+  "Fabrinet",
+  "Honda",
+  "Mitsubishi",
+  "Pepsi",
+  "Tesla",
+  "Toyota",
+  "Lion",
+];
+
 const AdminPage = () => {
   const [question, setQuestion] = useState("");
   const [answers, setAnswers] = useState([]);
-  const [isGameActive, setIsGameActive] = useState(false);
   const [users, setUsers] = useState([]);
   const [tabIndex, setTabIndex] = useState(0);
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("");
+  const [alert, setAlert] = useState({
+    open: false,
+    msg: "",
+    severity: "info",
+  });
+  const [drawnNumbers, setDrawnNumbers] = useState([]);
+  const [gameId, setGameId] = useState(null);
 
-  const [adminSocket, setAdminSocket] = React.useState(null);
+  // 🟧 Logo Quiz State
+  const [logoRound, setLogoRound] = useState(null);
+  const [logoScores, setLogoScores] = useState({});
+  const [selectedLogo, setSelectedLogo] = useState(LOGO_OPTIONS[0]);
+  const [logoLeaderboard, setLogoLeaderboard] = useState([]);
+  const [correctType, setCorrectType] = useState("real"); // ⭐ เพิ่มค่า default
+
+  // ───────────── SOCKET INIT ─────────────
+
   useEffect(() => {
-    setAdminSocket(socket);
-    socket.on("answerReceived", (data) => {
+    socket.emit("login", "Admin");
+
+    // ───────────── Register ─────────────
+    socket.on("updateUsers", (updated) => setUsers(updated));
+
+    const handleAnswerReceived = (data) => {
+      console.log("answerReceived", data);
       setAnswers((prev) => [...prev, data]);
+    };
+    socket.on("answerReceived", handleAnswerReceived);
+
+    socket.on("gameActive", (gameNo) => {
+      console.log("🎮 Active Game from server:", gameNo);
+      setTabIndex(gameNo);
     });
-    socket.on("updateUsers", (updatedUsers) => {
-      setUsers(updatedUsers);
+
+    socket.on("currentGame", (gameNo) => {
+      console.log("📦 Current game:", gameNo);
+      setTabIndex(gameNo);
     });
+
+    socket.on("gameStartedBingo", ({ game_id, drawnNumbers }) => {
+      setGameId(game_id);
+      setDrawnNumbers(drawnNumbers || []);
+      localStorage.setItem("admin_bingo_id", game_id);
+      localStorage.setItem(
+        "admin_bingo_numbers",
+        JSON.stringify(drawnNumbers || [])
+      );
+    });
+
+    socket.on("bingoNumber", ({ game_id, drawnNumbers }) => {
+      setGameId(game_id);
+      setDrawnNumbers(drawnNumbers);
+      localStorage.setItem("admin_bingo_id", game_id);
+      localStorage.setItem("admin_bingo_numbers", JSON.stringify(drawnNumbers));
+    });
+
+    // 🟧 Logo Quiz Listener
+    socket.on("logoRoundStarted", (data) => {
+      console.log("🟧 Logo Quiz Started:", data);
+      setLogoRound(data);
+    });
+
+    socket.on("scoreUpdatedLogo", ({ username, score }) => {
+      setLogoScores((prev) => ({
+        ...prev,
+        [username]: score,
+      }));
+    });
+
+    socket.on("logoLeaderboard", (list) => {
+      setLogoLeaderboard(list || []);
+    });
+
+    socket.on("logoGameReset", () => {
+      setLogoRound(null);
+      setLogoScores({});
+      setLogoLeaderboard([]);
+    });
+
+    // ───────────── Restore Saved State ─────────────
+    const savedId = localStorage.getItem("admin_bingo_id");
+    const savedNums = localStorage.getItem("admin_bingo_numbers");
+    if (savedId && savedNums) {
+      setGameId(savedId);
+      setDrawnNumbers(JSON.parse(savedNums));
+    }
+
+    // ───────────── Cleanup ─────────────
     return () => {
-      socket.off("answerReceived");
+      socket.off("updateUsers");
+      socket.off("answerReceived", handleAnswerReceived);
+      socket.off("gameActive");
+      socket.off("currentGame");
+      socket.off("gameStartedBingo");
+      socket.off("bingoNumber");
+      socket.off("logoRoundStarted");
+      socket.off("scoreUpdatedLogo");
+      socket.off("logoLeaderboard");
+      socket.off("logoGameReset");
     };
   }, []);
 
-  React.useEffect(() => {
-    if (socket) {
-      socket.emit("login", "Admin");
-    }
-  }, [socket]);
+  // ───────────── UTILITIES ─────────────
+  const showAlert = (msg, type = "info") =>
+    setAlert({ open: true, msg, severity: type });
 
-  const handleStartGame = () => {
-    if (!question.trim()) {
-      setAlertSeverity("error");
-      setAlertMessage("โปรดกรอกคำถามที่ถูกต้อง");
-      setAlertOpen(true);
-      return;
-    }
-    socket.emit("startGame", question);
+  const handleTabChange = (e, value) => {
+    setTabIndex(value);
+    socket.emit("gameActive", value);
+  };
+
+  // ───────────── GAME CONTROL ─────────────
+  const handleStartQuestion = () => {
+    if (!question.trim()) return showAlert("โปรดกรอกคำถามก่อนส่ง", "error");
+    socket.emit("newQuestion", question);
     setQuestion("");
-    setIsGameActive(true);
     setAnswers([]);
-
-    setAlertSeverity("success");
-    setAlertMessage("ส่งคำถามเรียบร้อยแล้ว");
-    setAlertOpen(true);
+    showAlert("ส่งคำถามเรียบร้อยแล้ว", "success");
   };
 
-  const handleStartGameMemory = () => {
+  const handleStartMemory = () => {
     socket.emit("startGameMemory");
-    setAlertSeverity("success");
-    setAlertMessage("เกมส์เริ่มแล้ว");
-    setAlertOpen(true);
-  };
-  const handleTabChange = (event, newValue) => {
-    socket.emit("gameActive", newValue);
-    setTabIndex(newValue);
+    showAlert("เริ่มเกมทดสอบความจำแล้ว", "success");
   };
 
+  const handleStartBingo = () => {
+    socket.emit("startGameBingo");
+    localStorage.removeItem("admin_bingo_id");
+    localStorage.removeItem("admin_bingo_numbers");
+    setDrawnNumbers([]);
+    setGameId(null);
+    showAlert("เริ่มเกมบิงโกใหม่แล้ว!", "success");
+  };
+
+  const handleDrawBingo = () => socket.emit("drawBingoNumber");
+
+  const handleClearBingo = () => {
+    localStorage.removeItem("admin_bingo_numbers");
+    setDrawnNumbers([]);
+    showAlert("เคลียร์หมายเลขที่ออกแล้วเรียบร้อย!", "info");
+  };
+
+  // 🟧 Logo Quiz: Start Round
+  const handleStartLogoQuiz = () => {
+    if (!selectedLogo) return showAlert("กรุณาเลือกโลโก้ก่อน", "error");
+    socket.emit("startLogoRoundAdmin", {
+      brand: selectedLogo,
+      correctType: correctType, // ⭐ ส่งไปยัง server
+    });
+    showAlert(
+      `เริ่มรอบเกมส์โลโก้: ${selectedLogo} (ตอบ ${correctType})`,
+      "success"
+    );
+  };
+
+  // 🟧 Logo Quiz: Reset Game
+  const handleResetLogoGame = () => {
+    socket.emit("resetLogoGame");
+    showAlert("รีเซ็ตเกมส์ทายโลโก้เรียบร้อย", "info");
+  };
+
+  // ───────────── UI ─────────────
   return (
     <>
       <Head>
-        <title>Admin - Apple Game</title>
-        <meta name="description" content="Generated by create next app" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>Admin - FITS Game</title>
       </Head>
-      <Layout username={"Admin"} users={users}>
-        <Grid
-          container
-          spacing={1}
-          display={"flex"}
-          justifyContent={"center"}
-          alignContent={"center"}
-        >
-          <Grid item xs={12} md={8}>
-            <Card
-              elevation={1}
-              sx={{
-                padding: "16px",
-                marginBottom: "24px",
-              }}
+
+      <Layout username="Admin" users={users}>
+        <Box sx={{ height: "calc(100vh - 64px)", p: 2 }}>
+          <Card sx={{ maxWidth: 900, mx: "auto", p: 3 }}>
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="h6" fontWeight="bold">
+                แผงควบคุมผู้ดูแลระบบเกม
+              </Typography>
+              <Chip
+                label={`${users.length} ออนไลน์`}
+                sx={{
+                  backgroundImage:
+                    "linear-gradient(to right, #72BF78, #15B392)",
+                  color: "white",
+                }}
+              />
+            </Stack>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Tabs
+              value={tabIndex}
+              onChange={handleTabChange}
+              textColor="primary"
+              indicatorColor="primary"
+              sx={{ mb: 2 }}
             >
-              <Stack
-                direction={"row"}
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <Typography variant="body" gutterBottom sx={{}}>
-                  แผงควบคุมผู้ดูแลระบบเกม
-                </Typography>
-                <Stack
-                  display={"flex"}
-                  justifyContent={"space-between"}
-                  direction={"row"}
-                  spacing={1}
-                >
-                  <Chip
-                    label={`${users.length} ออนไลน์`}
-                    variant="outlined"
-                    sx={{
-                      color: "white",
-                      backgroundImage:
-                        "linear-gradient(to right, #72BF78, #15B392)",
-                    }}
+              <Tab label="เกมส์ตอบคำถาม" />
+              <Tab label="เกมส์ความจำ" />
+              <Tab label="เกมส์บิงโก" />
+              <Tab label="เกมส์ทายโลโก้" />
+            </Tabs>
+
+            {/* TAB 0: QUESTION */}
+            {tabIndex === 0 && (
+              <Box>
+                <Card sx={{ p: 2, mb: 2 }}>
+                  <Typography fontWeight="bold">ส่งคำถามใหม่</Typography>
+                  <TextField
+                    label="ระบุคำถาม"
+                    fullWidth
+                    size="small"
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    sx={{ mt: 1 }}
                   />
-                </Stack>
-              </Stack>
-              <Divider sx={{ mt: 1, mb: 1 }} />
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={12}>
-                  <Grid item xs={12}>
-                    <Tabs
-                      value={tabIndex}
-                      onChange={handleTabChange}
-                      indicatorColor="primary"
-                      textColor="primary"
-                    >
-                      <Tab
-                        sx={{ textTransform: "none" }}
-                        label="เกมส์ตอบคำถาม"
-                      />
-                      <Tab
-                        sx={{ textTransform: "none" }}
-                        label="เกมส์ทดสอบความจำ"
-                      />
-                    </Tabs>
-                  </Grid>
-                </Grid>
-                {tabIndex === 0 && (
-                  <>
-                    <Grid item xs={12} md={12}>
-                      <Card
-                        elevation={1}
-                        style={{ padding: "16px", marginBottom: "24px" }}
-                      >
-                        <Typography variant="h6" gutterBottom>
-                          ส่งคำถามใหม่
-                        </Typography>
-                        <TextField
-                          label="ระบุคำถาม"
-                          fullWidth
-                          variant="outlined"
-                          size="small"
-                          value={question}
-                          onChange={(e) => setQuestion(e.target.value)}
-                        />
-                        <Box mt={2}>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={handleStartGame}
-                            sx={{
-                              backgroundImage:
-                                "linear-gradient(to right, #1e3a8a, #3b82f6)",
-                            }}
-                          >
-                            ส่ง
-                          </Button>
-                        </Box>
-                      </Card>
-                    </Grid>
-                    <Grid item xs={12} md={12}>
-                      <Typography variant="body" gutterBottom>
-                        คำตอบของผู้เล่น
+                  <Button
+                    variant="contained"
+                    onClick={handleStartQuestion}
+                    sx={{
+                      mt: 2,
+                      backgroundImage:
+                        "linear-gradient(to right, #1e3a8a, #3b82f6)",
+                    }}
+                  >
+                    ส่งคำถาม
+                  </Button>
+                </Card>
+
+                <Typography fontWeight="bold">คำตอบของผู้เล่น</Typography>
+                <Card sx={{ p: 2 }}>
+                  <List>
+                    {answers.length ? (
+                      answers.map((a, i) => (
+                        <ListItem key={i}>
+                          <ListItemAvatar>
+                            <Avatar>{i + 1}</Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={a.username}
+                            secondary={a.answer}
+                          />
+                        </ListItem>
+                      ))
+                    ) : (
+                      <Typography textAlign="center" color="text.secondary">
+                        ยังไม่มีคำตอบ
                       </Typography>
-                      <Card elevation={1} style={{ padding: "16px" }}>
-                        <List>
-                          {answers.length > 0 ? (
-                            answers.map((answer, index) => (
-                              <ListItem key={index}>
-                                <ListItemAvatar>
-                                  <Avatar
-                                    sx={{
-                                      backgroundImage:
-                                        "linear-gradient(to right, #1e3a8a, #3b82f6)",
-                                      color: "white",
-                                    }}
-                                  >
-                                    {index + 1}
-                                  </Avatar>
-                                </ListItemAvatar>
-                                <ListItemText
-                                  primary={`${answer.username}`}
-                                  secondary={`${answer.answer}`}
-                                />
-                              </ListItem>
-                            ))
-                          ) : (
-                            <Typography> ยังไม่ได้รับคำตอบ.</Typography>
-                          )}
-                        </List>
-                      </Card>
-                    </Grid>
-                  </>
+                    )}
+                  </List>
+                </Card>
+              </Box>
+            )}
+
+            {/* TAB 1: MEMORY */}
+            {tabIndex === 1 && (
+              <Box>
+                <Card sx={{ p: 2 }}>
+                  <Typography fontWeight="bold">
+                    กดเพื่อเริ่มเกมส์ความจำ
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={handleStartMemory}
+                    sx={{
+                      mt: 1,
+                      backgroundImage:
+                        "linear-gradient(to right, #1e3a8a, #3b82f6)",
+                    }}
+                  >
+                    เริ่มเกมส์ความจำ
+                  </Button>
+                </Card>
+              </Box>
+            )}
+
+            {/* TAB 2: BINGO */}
+            {tabIndex === 2 && (
+              <Box>
+                <Card sx={{ p: 2 }}>
+                  <Typography fontWeight="bold" gutterBottom>
+                    ควบคุมเกมส์บิงโก
+                  </Typography>
+
+                  <Typography sx={{ mb: 1 }}>
+                    🎮 รหัสรอบเกม: {gameId || "-"}
+                  </Typography>
+
+                  <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      onClick={handleStartBingo}
+                      sx={{
+                        backgroundImage:
+                          "linear-gradient(to right, #1e3a8a, #3b82f6)",
+                      }}
+                    >
+                      เริ่มเกมส์ใหม่
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={handleDrawBingo}
+                      disabled={!gameId}
+                    >
+                      สุ่มหมายเลข
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={handleClearBingo}
+                    >
+                      เคลียร์หมายเลข
+                    </Button>
+                  </Stack>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Typography fontWeight="bold">
+                    หมายเลขที่ออกแล้ว ({drawnNumbers.length})
+                  </Typography>
+
+                  <Grid container spacing={1}>
+                    {drawnNumbers.map((num, i) => (
+                      <Grid item key={i}>
+                        <Chip label={num} color="primary" />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Card>
+              </Box>
+            )}
+
+            {/* TAB 3: LOGO QUIZ */}
+            {tabIndex === 3 && (
+              <Box>
+                <Card sx={{ p: 2, mb: 2 }}>
+                  <Typography fontWeight="bold" gutterBottom>
+                    ควบคุมเกมส์ทายโลโก้ (จริง / ปลอม)
+                  </Typography>
+
+                  <TextField
+                    select
+                    label="เลือกโลโก้"
+                    fullWidth
+                    size="small"
+                    value={selectedLogo}
+                    onChange={(e) => setSelectedLogo(e.target.value)}
+                    sx={{ mt: 1 }}
+                  >
+                    {LOGO_OPTIONS.map((brand) => (
+                      <MenuItem key={brand} value={brand}>
+                        {brand}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+
+                  {/* ⭐ ส่วนใหม่: เลือกตอบจริง/ปลอม */}
+                  <TextField
+                    select
+                    label="ต้องตอบรูปอะไรถึงจะได้คะแนน?"
+                    fullWidth
+                    size="small"
+                    value={correctType}
+                    onChange={(e) => setCorrectType(e.target.value)}
+                    sx={{ mt: 2 }}
+                  >
+                    <MenuItem value="real">✔ รูปจริง (Real)</MenuItem>
+                    <MenuItem value="fake">✘ รูปปลอม (Fake)</MenuItem>
+                  </TextField>
+
+                  <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                    <Button
+                      variant="contained"
+                      onClick={handleStartLogoQuiz}
+                      sx={{
+                        backgroundImage:
+                          "linear-gradient(to right, #1e3a8a, #3b82f6)",
+                      }}
+                    >
+                      เริ่มรอบใหม่
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={handleResetLogoGame}
+                    >
+                      Reset เกมส์โลโก้
+                    </Button>
+                  </Stack>
+                </Card>
+
+                {/* ข้อมูลรอบปัจจุบัน */}
+                {logoRound && (
+                  <Card sx={{ p: 2, mb: 2 }}>
+                    <Typography variant="h6" fontWeight="bold">
+                      แบรนด์ปัจจุบัน: {logoRound.brand}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      คำตอบที่ถูกต้อง:{" "}
+                      <b>
+                        {logoRound.correctType === "real"
+                          ? "รูปจริง"
+                          : "รูปปลอม"}
+                      </b>
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      จำนวนตัวเลือก: {logoRound.choices?.length || 0}
+                    </Typography>
+                  </Card>
                 )}
 
-                {tabIndex === 1 && (
-                  <>
-                    <Grid item xs={12} md={6}>
-                      <Card
-                        elevation={1}
-                        style={{ padding: "16px", marginBottom: "24px" }}
-                      >
-                        <Typography variant="h6" gutterBottom>
-                          กดเพื่อเริ่มเกมส์ทันที
-                        </Typography>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={handleStartGameMemory}
-                          sx={{
-                            backgroundImage:
-                              "linear-gradient(to right, #1e3a8a, #3b82f6)",
-                          }}
-                        >
-                          เริ่มเกมส์ทดสอบความจำ
-                        </Button>
-                      </Card>
-                    </Grid>
-                  </>
-                )}
-              </Grid>
-            </Card>
-          </Grid>
-        </Grid>
+                {/* Top 3 Leaderboard */}
+                <Card sx={{ p: 2 }}>
+                  <Typography fontWeight="bold" gutterBottom>
+                    Top 10 ผู้เล่นคะแนนสูงสุด (Logo Quiz)
+                  </Typography>
+                  <List>
+                    {logoLeaderboard.length ? (
+                      logoLeaderboard.map((item, index) => (
+                        <ListItem key={item.username}>
+                          <ListItemAvatar>
+                            <Avatar>{index + 1}</Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={`${item.username}`}
+                            secondary={`คะแนน: ${item.score}`}
+                          />
+                        </ListItem>
+                      ))
+                    ) : (
+                      <Typography textAlign="center" color="text.secondary">
+                        ยังไม่มีผู้เล่นทำคะแนน
+                      </Typography>
+                    )}
+                  </List>
+                </Card>
+              </Box>
+            )}
+          </Card>
+        </Box>
       </Layout>
+
       <Snackbar
-        open={alertOpen}
-        autoHideDuration={6000}
-        onClose={() => setAlertOpen(false)}
+        open={alert.open}
+        autoHideDuration={3000}
+        onClose={() => setAlert({ ...alert, open: false })}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert
-          anchor
-          vertical="top"
-          onClose={() => setAlertOpen(false)}
-          severity={alertSeverity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {alertMessage}
+        <Alert severity={alert.severity} variant="filled">
+          {alert.msg}
         </Alert>
       </Snackbar>
     </>
