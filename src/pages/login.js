@@ -25,9 +25,27 @@ export default function App() {
       </Head>
 
       {/* 🔥 Animated Gradient Background */}
-      <Box
+      {/* <Box
         sx={{
           height: "100vh",
+          width: "100vw",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background:
+            "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #6b46c1 100%)",
+          backgroundSize: "300% 300%",
+          animation: "gradientMove 12s ease infinite",
+          "@keyframes gradientMove": {
+            "0%": { backgroundPosition: "0% 50%" },
+            "50%": { backgroundPosition: "100% 50%" },
+            "100%": { backgroundPosition: "0% 50%" },
+          },
+        }}
+      > */}
+      <Box
+        sx={{
+          height: "100dvh", // ⭐ แก้ปัญหา scroll บนมือถือ
           width: "100vw",
           display: "flex",
           justifyContent: "center",

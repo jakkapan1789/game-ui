@@ -98,7 +98,7 @@ export default function Layout({ username, users, children }) {
           </Stack>
         </Toolbar>
       </AppBar>
-
+      {/* 
       <Box
         component="main"
         sx={{
@@ -106,6 +106,16 @@ export default function Layout({ username, users, children }) {
           flexDirection: "column",
           height: "100vh", // ✅ ใช้ height แทน minHeight
           width: "100%",
+        }}
+      > */}
+      <Box
+        component="main"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100dvh", // ⭐แก้ปัญหา scroll บนมือถือ
+          width: "100%",
+          overflow: "hidden", // ⭐ ปิด scroll เผื่อมีการคำนวณผิด
         }}
       >
         <Toolbar /> {/* เว้น Header */}
@@ -263,8 +273,8 @@ export default function Layout({ username, users, children }) {
                 aspectRatio: "4 / 6", // ⭐ แนวตั้ง
                 borderRadius: 2,
                 mb: 2,
-                minHeight: 350,
-                maxHeight: 350,
+                minHeight: 370,
+                maxHeight: 370,
               }}
             />
           )}
@@ -285,8 +295,8 @@ export default function Layout({ username, users, children }) {
               opacity: qrLoading ? 0 : 1,
               transition: "opacity 0.4s ease",
               display: qrLoading ? "none" : "block",
-              minHeight: 350,
-              maxHeight: 350,
+              minHeight: 370,
+              maxHeight: 370,
             }}
           />
 
