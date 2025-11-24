@@ -16,6 +16,7 @@ import {
   List,
   Dialog,
   DialogContent,
+  Skeleton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -42,6 +43,8 @@ export default function Layout({ username, users, children }) {
   const [openDonate, setOpenDonate] = React.useState(false);
   const handleOpenDonate = () => setOpenDonate(true);
   const handleCloseDonate = () => setOpenDonate(false);
+
+  const [qrLoading, setQrLoading] = React.useState(true);
 
   return (
     <React.Fragment>
@@ -250,15 +253,40 @@ export default function Layout({ username, users, children }) {
             ต่อไป ❤️
           </Typography>
 
+          {/* Skeleton แนวตั้ง */}
+          {qrLoading && (
+            <Skeleton
+              variant="rectangular"
+              animation="wave"
+              sx={{
+                width: "100%",
+                aspectRatio: "4 / 6", // ⭐ แนวตั้ง
+                borderRadius: 2,
+                mb: 2,
+                minHeight: 350,
+                maxHeight: 350,
+              }}
+            />
+          )}
+
+          {/* ภาพ QR แนวตั้ง */}
           <Box
             component="img"
             src="/images/qr-payment.jpeg"
             alt="Donate QR"
+            onLoad={() => setQrLoading(false)}
             sx={{
               width: "100%",
+              aspectRatio: "4 / 6", // ⭐ แนวตั้งเหมือน Skeleton
+              objectFit: "cover", // หรือ "contain" ถ้าไม่อยากครอป
               borderRadius: 2,
               mb: 2,
               boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              opacity: qrLoading ? 0 : 1,
+              transition: "opacity 0.4s ease",
+              display: qrLoading ? "none" : "block",
+              minHeight: 350,
+              maxHeight: 350,
             }}
           />
 

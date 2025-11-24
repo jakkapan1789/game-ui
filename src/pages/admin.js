@@ -232,7 +232,7 @@ const AdminPage = () => {
 
             <Divider sx={{ my: 2 }} />
 
-            <Tabs
+            {/* <Tabs
               value={tabIndex}
               onChange={handleTabChange}
               textColor="primary"
@@ -243,6 +243,26 @@ const AdminPage = () => {
               <Tab label="เกมส์ความจำ" />
               <Tab label="เกมส์บิงโก" />
               <Tab label="เกมส์ทายโลโก้" />
+            </Tabs> */}
+            <Tabs
+              value={tabIndex}
+              onChange={handleTabChange}
+              textColor="primary"
+              indicatorColor="primary"
+              variant="scrollable" // ⭐ เพิ่ม
+              scrollButtons="auto" // ⭐ แสดงปุ่มเลื่อนบน desktop
+              allowScrollButtonsMobile // ⭐ เปิดปุ่มบนมือถือด้วย (MUI v5+)
+              sx={{
+                mb: 2,
+                "& .MuiTab-root": {
+                  minWidth: "120px", // ⭐ ให้เลื่อนได้ดีบนมือถือ
+                },
+              }}
+            >
+              <Tab label="ตอบคำถาม" />
+              <Tab label="ความจำ" />
+              <Tab label="บิงโก" />
+              <Tab label="ทายโลโก้" />
             </Tabs>
 
             {/* TAB 0: QUESTION */}
@@ -330,7 +350,7 @@ const AdminPage = () => {
                     🎮 รหัสรอบเกม: {gameId || "-"}
                   </Typography>
 
-                  <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                  <Stack direction="column" spacing={2} sx={{ mb: 2 }}>
                     <Button
                       variant="contained"
                       onClick={handleStartBingo}
@@ -412,7 +432,7 @@ const AdminPage = () => {
                     <MenuItem value="fake">✘ รูปปลอม (Fake)</MenuItem>
                   </TextField>
 
-                  <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                  <Stack direction="column" spacing={2} sx={{ mt: 2 }}>
                     <Button
                       variant="contained"
                       onClick={handleStartLogoQuiz}
@@ -427,6 +447,7 @@ const AdminPage = () => {
                       variant="outlined"
                       color="error"
                       onClick={handleResetLogoGame}
+                      sx={{ textTransform: "none" }}
                     >
                       Reset เกมส์โลโก้
                     </Button>

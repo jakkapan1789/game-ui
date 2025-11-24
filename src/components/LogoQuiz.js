@@ -44,14 +44,27 @@ export default function LogoQuizGame({ username, socket }) {
       setScore(0);
     });
 
+    // socket.on("scoreUpdatedLogo", ({ score, points }) => {
+    //   setScore(score);
+
+    //   // console.log("points", score);s
+    //   if (points > 0) {
+    //     // ⭐ คะแนนปกติ
+    //     setScorePopup({ open: true, points });
+    //     setTimeout(() => setScorePopup({ open: false, points: 0 }), 2000);
+    //   }
+    // });
     socket.on("scoreUpdatedLogo", ({ score, points }) => {
       setScore(score);
 
-      // console.log("points", score);s
       if (points > 0) {
-        // ⭐ คะแนนปกติ
         setScorePopup({ open: true, points });
         setTimeout(() => setScorePopup({ open: false, points: 0 }), 2000);
+      }
+
+      if (points < 0) {
+        setWrongPopup(true); // ⭐ แสดง popup -1
+        setTimeout(() => setWrongPopup(false), 2000);
       }
     });
 
@@ -268,7 +281,7 @@ export default function LogoQuizGame({ username, socket }) {
         sx={{ mb: 8 }}
       >
         <Alert severity="error" variant="filled">
-          +0 คะแนน ❌ ตอบผิด
+          -1 คะแนน ❌ ตอบผิด
         </Alert>
       </Snackbar>
     </Box>

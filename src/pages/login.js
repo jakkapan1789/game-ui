@@ -1,134 +1,3 @@
-// import * as React from "react";
-// import Box from "@mui/material/Box";
-// import Typography from "@mui/material/Typography";
-// import Button from "@mui/material/Button";
-// import TextField from "@mui/material/TextField";
-// import Head from "next/head";
-// import { useRouter } from "next/router";
-
-// export default function App() {
-//   const router = useRouter();
-//   const [username, setUsername] = React.useState("");
-
-//   const handleLogin = (e) => {
-//     e.preventDefault();
-//     if (username.trim()) {
-//       localStorage.setItem("username", username);
-//       router.push("/play");
-//     }
-//   };
-
-//   return (
-//     <>
-//       <Head>
-//         <title>Login - FITS Game</title>
-//         <meta name="description" content="Login to FITS Game" />
-//         <meta name="viewport" content="width=device-width, initial-scale=1" />
-//       </Head>
-
-//       <Box
-//         sx={{
-//           height: "100vh",
-//           width: "100vw",
-//           display: "flex",
-//           flexDirection: "column",
-//           justifyContent: "center",
-//           alignItems: "center",
-//           bgcolor: "#f7f8fa",
-//           overflow: "hidden", // ✅ ป้องกัน scroll
-//         }}
-//       >
-//         <Box
-//           component="form"
-//           onSubmit={handleLogin}
-//           sx={{
-//             width: "90%",
-//             maxWidth: 380,
-//             bgcolor: "white",
-//             p: 4,
-//             borderRadius: 3,
-//             boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
-//             display: "flex",
-//             flexDirection: "column",
-//             alignItems: "center",
-//             gap: 2,
-//             m: 5,
-//           }}
-//         >
-//           <Typography
-//             variant="h5"
-//             sx={{
-//               fontWeight: 600,
-//               color: "#1e293b",
-//               letterSpacing: "0.3px",
-//             }}
-//           >
-//             FITS Game
-//           </Typography>
-
-//           <Typography
-//             variant="body2"
-//             sx={{
-//               color: "text.secondary",
-//               mb: 1,
-//               textAlign: "center",
-//             }}
-//           >
-//             เข้าสู่ระบบเพื่อเริ่มเล่นเกม
-//           </Typography>
-
-//           <TextField
-//             fullWidth
-//             label="ชื่อเล่น"
-//             variant="outlined"
-//             size="small"
-//             autoComplete="off"
-//             value={username}
-//             onChange={(e) => setUsername(e.target.value)}
-//             sx={{
-//               "& .MuiOutlinedInput-root": {
-//                 borderRadius: 2,
-//               },
-//             }}
-//             required
-//           />
-
-//           <Button
-//             type="submit"
-//             fullWidth
-//             variant="contained"
-//             sx={{
-//               textTransform: "none",
-//               fontWeight: 600,
-//               mt: 1,
-//               borderRadius: 2,
-//               py: 1.2,
-//               bgcolor: "#2563eb",
-//               "&:hover": {
-//                 bgcolor: "#1e40af",
-//               },
-//             }}
-//           >
-//             เข้าสู่ระบบ
-//           </Button>
-//         </Box>
-
-//         <Typography
-//           variant="caption"
-//           sx={{
-//             mt: 3,
-//             color: "text.secondary",
-//             userSelect: "none",
-//             opacity: 0.6,
-//           }}
-//         >
-//           © {new Date().getFullYear()} FITS Game Powered by Idelix Nimble All
-//           rights reserved.
-//         </Typography>
-//       </Box>
-//     </>
-//   );
-// }
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -258,7 +127,16 @@ export default function App() {
               "& .MuiFilledInput-root.Mui-focused:before": {
                 borderBottom: "none !important",
               },
-              fontSize: 16,
+              "& .MuiInputBase-input": {
+                fontSize: "16px !important", // ⭐ ป้องกันซูม
+              },
+              "& .MuiInputLabel-root": {
+                fontSize: "16px !important", // ⭐ Label ต้อง 16px เช่นกัน
+              },
+              "& .MuiFilledInput-root": {
+                borderRadius: "12px",
+                backgroundColor: "rgba(255,255,255,0.2)",
+              },
             }}
           />
 
