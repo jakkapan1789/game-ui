@@ -38,6 +38,7 @@ const LOGO_OPTIONS = [
   "Tesla",
   "Toyota",
   "Lion",
+  "Zebra",
 ];
 
 const AdminPage = () => {
@@ -232,18 +233,6 @@ const AdminPage = () => {
 
             <Divider sx={{ my: 2 }} />
 
-            {/* <Tabs
-              value={tabIndex}
-              onChange={handleTabChange}
-              textColor="primary"
-              indicatorColor="primary"
-              sx={{ mb: 2 }}
-            >
-              <Tab label="เกมส์ตอบคำถาม" />
-              <Tab label="เกมส์ความจำ" />
-              <Tab label="เกมส์บิงโก" />
-              <Tab label="เกมส์ทายโลโก้" />
-            </Tabs> */}
             <Tabs
               value={tabIndex}
               onChange={handleTabChange}

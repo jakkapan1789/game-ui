@@ -108,6 +108,11 @@ export default function LogoQuizGame({ username, socket }) {
     setSelected("ANSWERED");
   };
 
+  const animalNameMap = {
+    Lion: "สิงโต",
+    Zebra: "ม้าลาย",
+  };
+
   const getInstructionText = () => {
     if (!roundData) return "";
 
@@ -115,12 +120,19 @@ export default function LogoQuizGame({ username, socket }) {
     const isReal = roundData.correctType === "real";
 
     // ถ้าชื่อ brand เป็นสัตว์ เช่น “Lion”
-    const animalBrands = ["Lion", "Tiger", "Cat", "Dog"];
+    const animalBrands = ["Lion", "Tiger", "Cat", "Dog", "Zebra"];
 
+    // if (animalBrands.includes(brand)) {
+    //   return isReal
+    //     ? `ภาพไหนคือ ${brand === "Lion" ? "สิงโต" : brand} จริง?`
+    //     : `ภาพไหนคือ ${brand === "Lion" ? "สิงโต" : brand} ปลอม?`;
+    // }
     if (animalBrands.includes(brand)) {
+      const thaiName = animalNameMap[brand] || brand;
+
       return isReal
-        ? `ภาพไหนคือ ${brand === "Lion" ? "สิงโต" : brand} จริง?`
-        : `ภาพไหนคือ ${brand === "Lion" ? "สิงโต" : brand} ปลอม?`;
+        ? `ภาพไหนคือ ${thaiName} จริง?`
+        : `ภาพไหนคือ ${thaiName} ปลอม?`;
     }
 
     // default สำหรับแบรนด์ (Logo)
