@@ -998,6 +998,7 @@ const BingoGame = ({ username, socket }) => {
     socket.on("gameStartedBingo", ({ game_id, board, drawnNumbers }) => {
       setLockedOut(false);
       setSyncChecked(true);
+      setWinningNumbers([]);
 
       setGameId(game_id);
       setBoard(board);
