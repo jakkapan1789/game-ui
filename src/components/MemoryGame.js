@@ -162,35 +162,6 @@ const MemoryGame = ({ username }) => {
       }}
     >
       {!gameStarted && (
-        // <Stack
-        //   spacing={2}
-        //   alignItems="center"
-        //   justifyContent="center"
-        //   sx={{
-        //     textAlign: "center",
-        //     color: "text.secondary",
-        //   }}
-        // >
-        //   <Typography variant="h4" fontWeight="bold" color="text.primary">
-        //     เกมส์จับคู่ภาพ
-        //   </Typography>
-        //   <Typography variant="h6" fontWeight="bold" color="text.primary">
-        //     🕹️ รอผู้ดูแลเริ่มเกม
-        //   </Typography>
-        //   <Typography variant="body1">
-        //     เมื่อผู้ดูแลเริ่มเกม หน้านี้จะโหลดอัตโนมัติ
-        //   </Typography>
-        //   <Typography variant="h5" fontWeight="bold" color="text.primary">
-        //     🕹️ กติกาและวิธีการเล่น
-        //   </Typography>
-        //   <Typography variant="body1">
-        //     การแข่งขันทดสอบความจำให้จับคู่ภาพที่เหมือนกัน
-        //   </Typography>
-        //   <Typography variant="body1">
-        //     ถ้าจับคู่ภาพที่ตรงกันจะสามารถกดจับคู่ต่อไปได้ทันที
-        //     แต่ถ้าผิดจะต้องรอภาพหมุนกลับมาก่อน
-        //   </Typography>
-        // </Stack>
         <Stack
           spacing={3}
           alignItems="center"
