@@ -39,6 +39,12 @@ const LOGO_OPTIONS = [
   "Toyota",
   "Lion",
   "Zebra",
+  "Cat",
+  "Raccoon",
+  "Panda",
+  "Strong Cat",
+  "Microsoft",
+  "Dog",
 ];
 
 const AdminPage = () => {

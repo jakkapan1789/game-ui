@@ -6,20 +6,16 @@ import {
   Card,
   Grid,
   LinearProgress,
-  Snackbar,
-  Alert,
   Drawer,
   IconButton,
   Stack,
   Divider,
-  Chip,
   ListItem,
   ListItemText,
   ListItemAvatar,
   Avatar,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
-import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 
 export default function LogoQuizGame({ username, socket }) {
@@ -29,7 +25,6 @@ export default function LogoQuizGame({ username, socket }) {
   const [score, setScore] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const [logoLeaderboard, setLogoLeaderboard] = useState([]);
-  const [scorePopup, setScorePopup] = useState({ open: false, points: 0 });
   const [wrongPopup, setWrongPopup] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -111,6 +106,11 @@ export default function LogoQuizGame({ username, socket }) {
   const animalNameMap = {
     Lion: "สิงโต",
     Zebra: "ม้าลาย",
+    Cat: "แมว",
+    Raccoon: "แรคคูน",
+    Panda: "แพนด้า",
+    Dog: "หมา",
+    "Strong Cat": "แมว",
   };
 
   const getInstructionText = () => {
@@ -118,13 +118,20 @@ export default function LogoQuizGame({ username, socket }) {
 
     const brand = roundData.brand;
     const isReal = roundData.correctType === "real";
-    const animalBrands = ["Lion", "Tiger", "Cat", "Dog", "Zebra"];
+    const animalBrands = [
+      "Lion",
+      "Tiger",
+      "Cat",
+      "Dog",
+      "Zebra",
+      "Raccoon",
+      "Panda",
+      "Strong Cat",
+    ];
 
     if (animalBrands.includes(brand)) {
       const thaiName = animalNameMap[brand] || brand;
-      return isReal
-        ? `ภาพไหนคือ ${thaiName} จริง?`
-        : `ภาพไหนคือ ${thaiName} ปลอม?`;
+      return isReal ? `ภาพไหนคือ ${thaiName} ?` : `ภาพไหนไม่ใช่ ${thaiName} ?`;
     }
 
     return isReal
@@ -184,10 +191,10 @@ export default function LogoQuizGame({ username, socket }) {
               วิธีการเล่น
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-              1. คุณจะเห็นภาพโลโก้หรือสัตว์และโจทย์คำถาม
+              1. คุณจะเห็นภาพและโจทย์คำถาม
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              2. เลือกภาพที่คุณคิดว่าถูกต้องที่สุด
+              2. เลือกภาพที่ถูกต้องและกดส่งคำตอบ
             </Typography>
             <Typography variant="body1" color="text.secondary">
               3. หากเลือกถูกจะได้รับคะแนน
@@ -203,7 +210,7 @@ export default function LogoQuizGame({ username, socket }) {
               - เวลาเหลือมากกว่า 5 วินาที +2 คะแนน
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ pl: 2 }}>
-              - เวลาเหลือมากกว่า 3 วินาที +1 คะแนน
+              - เวลาเหลือน้อยกว่า 5 วินาที +1 คะแนน
             </Typography>
             <Typography variant="body1" color="error.main" sx={{ pl: 2 }}>
               - ตอบผิด -1 คะแนน
@@ -258,7 +265,7 @@ export default function LogoQuizGame({ username, socket }) {
             </Box>
           )}
 
-          <Grid
+          {/* <Grid
             container
             spacing={2}
             justifyContent="center"
@@ -299,6 +306,53 @@ export default function LogoQuizGame({ username, socket }) {
                       width: "90%",
                       height: "80%",
                       objectFit: "contain",
+                    }}
+                  />
+                </Card>
+              </Grid>
+            ))}
+          </Grid> */}
+          <Grid
+            container
+            spacing={2}
+            justifyContent="center"
+            sx={{ mt: 1, px: 1 }}
+          >
+            {roundData.choices.map((c, index) => (
+              <Grid item xs={6} key={index}>
+                <Card
+                  onClick={() =>
+                    countdown > 0 &&
+                    selected !== "ANSWERED" &&
+                    setSelected(index)
+                  }
+                  sx={{
+                    p: 0, // ⭐ สำคัญ
+                    height: { xs: 180, md: 220 },
+                    border:
+                      selected === index
+                        ? "4px solid #3b82f6"
+                        : "2px solid transparent",
+                    cursor: countdown > 0 ? "pointer" : "not-allowed",
+                    opacity: countdown > 0 ? 1 : 0.4,
+                    borderRadius: 3,
+                    overflow: "hidden", // ⭐ กันภาพล้น
+                    transition: "0.2s",
+                    transform: selected === index ? "scale(1.05)" : "scale(1)",
+                    boxShadow:
+                      selected === index
+                        ? "0 0 10px rgba(59,130,246,0.6)"
+                        : "0 2px 10px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={c.image}
+                    alt=""
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain", // ⭐ เต็มการ์ด
                     }}
                   />
                 </Card>

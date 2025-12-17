@@ -225,7 +225,7 @@ const CountdownTimer = ({ targetDate }) => {
                   display: { xs: "none", md: "block" }, // ⭐ mobile ซ่อน
                   fontSize: { md: 40, lg: 48 },
                   fontWeight: 800,
-                  color: "primary.main",
+                  color: "white",
                   mb: 3,
                   textShadow:
                     "0 0 12px rgba(0,229,255,0.8), 0 0 32px rgba(0,229,255,0.6)",

@@ -39,6 +39,18 @@ const GAME_IMAGES = [
   "/logos/lion-fake.jpeg",
   "/logos/zebra-real.png",
   "/logos/zebra-fake.png",
+  "/logos/cat-like.png",
+  "/logos/lion-like.png",
+  "/logos/raccoon-mafia.png",
+  "/logos/cat-mafia.png",
+  "/logos/cute-panda.png",
+  "/logos/cat-panda.png",
+  "/logos/strong-cat.png",
+  "/logos/strong-panda.png",
+  "/logos/microsoft-real.png",
+  "/logos/microsoft-fake.png",
+  "/logos/dog-real.png",
+  "/logos/dog-fake.png",
 ];
 export default function App() {
   const router = useRouter();
