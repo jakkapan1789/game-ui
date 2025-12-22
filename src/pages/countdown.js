@@ -1,4 +1,4 @@
-import { Box, Container, Typography, Button } from "@mui/material";
+import { Box, Container, Typography, Button, Stack } from "@mui/material";
 import Head from "next/head";
 import CountdownTimer from "@/components/ui/CountdownTimer";
 import ParticleBackground from "@/components/ui/ParticleBackground";
@@ -98,23 +98,48 @@ const Index = () => {
               December 26, 2025, 7:00 PM
             </Typography>
           </Box>{" "}
-          <Button
-            variant="contained"
-            sx={{
-              background: "linear-gradient(90deg,#4f46e5,#9333ea)",
-              boxShadow: "0 0 12px rgba(147,51,234,0.7)",
-              "&:hover": {
-                background: "linear-gradient(90deg,#4338ca,#7e22ce)",
-                boxShadow: "0 0 18px rgba(147,51,234,0.9)",
-              },
-              textTransform: "none",
-            }}
-            onClick={() =>
-              window.open("https://maps.app.goo.gl/P8JBew4kqVoq2eCT9", "_blank")
-            }
-          >
-            Restaurant Map
-          </Button>
+          <Stack direction={"row"} spacing={2}>
+            <Button
+              variant="contained"
+              sx={{
+                background: "linear-gradient(90deg,#4f46e5,#9333ea)",
+                boxShadow: "0 0 12px rgba(147,51,234,0.7)",
+                "&:hover": {
+                  background: "linear-gradient(90deg,#4338ca,#7e22ce)",
+                  boxShadow: "0 0 18px rgba(147,51,234,0.9)",
+                },
+                textTransform: "none",
+              }}
+              onClick={() =>
+                window.open(
+                  "https://maps.app.goo.gl/P8JBew4kqVoq2eCT9",
+                  "_blank"
+                )
+              }
+            >
+              Restaurant Map
+            </Button>
+            <Button
+              variant="contained"
+              sx={{
+                background: "linear-gradient(90deg,#4f46e5,#9333ea)",
+                boxShadow: "0 0 12px rgba(147,51,234,0.7)",
+                "&:hover": {
+                  background: "linear-gradient(90deg,#4338ca,#7e22ce)",
+                  boxShadow: "0 0 18px rgba(147,51,234,0.9)",
+                },
+                textTransform: "none",
+              }}
+              onClick={() =>
+                window.open(
+                  "https://maps.app.goo.gl/P8JBew4kqVoq2eCT9",
+                  "_blank"
+                )
+              }
+            >
+              Food menu
+            </Button>
+          </Stack>
         </Container>
       </Box>
     </>
