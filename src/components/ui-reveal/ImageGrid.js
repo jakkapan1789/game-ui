@@ -1,291 +1,227 @@
-// import { useState, useEffect } from "react";
-// import GridPiece from "./GridPiece";
-// import { Box, Typography } from "@mui/material";
-
-// // ========== ตั้งค่าที่นี่ ==========
-// const ROWS = 8; // จำนวนแถว
-// const COLS = 8; // จำนวนคอลัมน์
-// // =====================================
-
-// const GRID_SIZE = ROWS * COLS; // เช่น 50 ช่อง
-// const MAX_SCORE_PER_ROUND = 200;
-// const REVEAL_PENALTY = 20;
-
-// const ImageGrid = ({ category }) => {
-//   const [gameState, setGameState] = useState({
-//     currentImage: null,
-//     revealedPieces: Array(GRID_SIZE).fill(false),
-//     score: MAX_SCORE_PER_ROUND,
-//     totalScore: 0,
-//     hintsUsed: 0,
-//     guessAttempts: 0,
-//     isGameWon: false,
-//     isGameOver: false,
-//   });
-
-//   const [imageAspectRatio, setImageAspectRatio] = useState(`${COLS} / ${ROWS}`); // default fallback
-
-//   useEffect(() => {
-//     startGame(category);
-//   }, [category]);
-
-//   const startGame = (category) => {
-//     const image = {
-//       id: "Dog",
-//       src: "/games/cat-panda.png",
-//       answer: "dog wearing bunny ears",
-//       hints: ["It's an animal", "Wearing bunny ears", "Cute golden retriever"],
-//       category: "animals",
-//     };
-
-//     setGameState({
-//       currentImage: image,
-//       revealedPieces: Array(GRID_SIZE).fill(false),
-//       score: MAX_SCORE_PER_ROUND,
-//       totalScore: gameState.totalScore || 0,
-//       hintsUsed: 0,
-//       guessAttempts: 0,
-//       isGameWon: false,
-//       isGameOver: false,
-//     });
-//   };
-
-//   // โหลดขนาดจริงของภาพเพื่อคำนวณ aspect ratio ที่ถูกต้อง
-//   useEffect(() => {
-//     if (gameState.currentImage) {
-//       const img = new Image();
-//       img.src = gameState.currentImage.src;
-//       img.onload = () => {
-//         // ใช้ขนาดจริงของภาพ ไม่ใช่ grid
-//         setImageAspectRatio(`${img.naturalWidth} / ${img.naturalHeight}`);
-//       };
-//       img.onerror = () => {
-//         setImageAspectRatio(`${COLS} / ${ROWS}`); // fallback
-//       };
-//     }
-//   }, [gameState.currentImage]);
-
-//   const revealPiece = (index) => {
-//     if (
-//       gameState.revealedPieces[index] ||
-//       gameState.isGameWon ||
-//       gameState.isGameOver
-//     ) {
-//       return;
-//     }
-
-//     setGameState((prev) => {
-//       const newRevealed = [...prev.revealedPieces];
-//       newRevealed[index] = true;
-//       const newScore = Math.max(0, prev.score - REVEAL_PENALTY);
-//       const allRevealed = newRevealed.every(Boolean);
-
-//       return {
-//         ...prev,
-//         revealedPieces: newRevealed,
-//         score: newScore,
-//         isGameOver: allRevealed && !prev.isGameWon,
-//       };
-//     });
-//   };
-
-//   return (
-//     <Box sx={{ py: 4 }}>
-//       {gameState.currentImage ? (
-//         <Box sx={{ textAlign: "center" }}>
-//           <Typography variant="h4" gutterBottom>
-//             เงินรางวัล: {gameState.score} บาท ({GRID_SIZE} ช่อง)
-//           </Typography>
-
-//           <Box
-//             sx={{
-//               display: "grid",
-//               gridTemplateColumns: `repeat(${COLS}, 1fr)`,
-//               gridTemplateRows: `repeat(${ROWS}, 1fr)`,
-//               gap: 0,
-//               width: "100%",
-//               maxWidth: "800px", // ปรับตามต้องการ (ใหญ่ขึ้นสำหรับช่องเยอะ)
-//               margin: "0 auto",
-//               aspectRatio: imageAspectRatio, // ตามขนาดภาพจริง → ต่อกันเป๊ะ
-//               border: "1px solid #333",
-//               overflow: "hidden",
-//               boxShadow: 3,
-//             }}
-//           >
-//             {gameState.revealedPieces.map((isRevealed, index) => (
-//               <GridPiece
-//                 key={index}
-//                 index={index}
-//                 isRevealed={isRevealed}
-//                 imageSrc={gameState.currentImage.src}
-//                 rows={ROWS}
-//                 cols={COLS}
-//                 onReveal={revealPiece}
-//                 disabled={gameState.isGameWon || gameState.isGameOver}
-//               />
-//             ))}
-//           </Box>
-//         </Box>
-//       ) : (
-//         <Typography variant="h5" align="center">
-//           Select a category to start the game!
-//         </Typography>
-//       )}
-//     </Box>
-//   );
-// };
-
-// export default ImageGrid;
 import { useState, useEffect } from "react";
 import GridPiece from "./GridPiece";
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Stack,
+  Select,
+  MenuItem,
+  Fade,
+} from "@mui/material";
 
-// ========== ตั้งค่าที่นี่ ==========
+/* ================= CONFIG ================= */
 const ROWS = 10;
 const COLS = 10;
-// =====================================
-
 const GRID_SIZE = ROWS * COLS;
 const MAX_SCORE_PER_ROUND = 200;
 const REVEAL_PENALTY = 20;
+/* ========================================= */
 
-const ImageGrid = ({ category }) => {
+/* ===== IMAGE POOL ===== */
+const IMAGE_POOL = [
+  {
+    id: "FoxChef",
+    label: "🦊 Secret 1",
+    src: "/games/cat-panda.png",
+    category: "animals",
+  },
+  {
+    id: "FoxChef2",
+    label: "🦊 Secret 2",
+    src: "/games/dog-rabbit.png",
+    category: "animals",
+  },
+];
+
+const ImageGrid = () => {
+  const [selectedImageId, setSelectedImageId] = useState(IMAGE_POOL[0].id);
+
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   const [gameState, setGameState] = useState({
     currentImage: null,
     revealedPieces: Array(GRID_SIZE).fill(false),
     score: MAX_SCORE_PER_ROUND,
-    totalScore: 0,
-    hintsUsed: 0,
-    guessAttempts: 0,
-    isGameWon: false,
     isGameOver: false,
   });
 
-  const [imageAspectRatio, setImageAspectRatio] = useState(`${COLS} / ${ROWS}`);
+  /* ===== START GAME (SAFE) ===== */
+  const startGameWithImage = (imageId) => {
+    const image = IMAGE_POOL.find((i) => i.id === imageId);
+    if (!image) return;
 
-  useEffect(() => {
-    startGame(category);
-  }, [category]);
+    // 1️⃣ ปิด grid ก่อน
+    setIsTransitioning(true);
 
-  const startGame = (category) => {
-    const image = {
-      id: "CatPanda",
-      src: "/games/cute-panda.png",
-      answer: "แมวแต่งตัวเป็นแพนด้า",
-      hints: ["สัตว์น่ารัก", "แต่งตัวแฟนซี", "สีขาวดำ"],
-      category: "animals",
-    };
-
+    // 2️⃣ clear state
     setGameState({
-      currentImage: image,
+      currentImage: null,
       revealedPieces: Array(GRID_SIZE).fill(false),
       score: MAX_SCORE_PER_ROUND,
-      totalScore: gameState.totalScore || 0,
-      hintsUsed: 0,
-      guessAttempts: 0,
-      isGameWon: false,
       isGameOver: false,
+    });
+
+    // 3️⃣ เปิดเกมใหม่หลัง frame นึง
+    requestAnimationFrame(() => {
+      setGameState({
+        currentImage: image,
+        revealedPieces: Array(GRID_SIZE).fill(false),
+        score: MAX_SCORE_PER_ROUND,
+        isGameOver: false,
+      });
+      setIsTransitioning(false);
     });
   };
 
+  /* ===== INIT ===== */
   useEffect(() => {
-    if (gameState.currentImage) {
-      const img = new Image();
-      img.src = gameState.currentImage.src;
-      img.onload = () => {
-        setImageAspectRatio(`${img.naturalWidth} / ${img.naturalHeight}`);
-      };
-      img.onerror = () => {
-        setImageAspectRatio(`${COLS} / ${ROWS}`);
-      };
-    }
-  }, [gameState.currentImage]);
+    startGameWithImage(selectedImageId);
+  }, []);
 
+  /* ===== REVEAL SINGLE ===== */
   const revealPiece = (index) => {
-    if (
-      gameState.revealedPieces[index] ||
-      gameState.isGameWon ||
-      gameState.isGameOver
-    ) {
-      return;
-    }
-
     setGameState((prev) => {
-      const newRevealed = [...prev.revealedPieces];
-      newRevealed[index] = true;
-      const newScore = Math.max(0, prev.score - REVEAL_PENALTY);
-      const allRevealed = newRevealed.every(Boolean);
+      if (prev.revealedPieces[index] || prev.isGameOver) return prev;
+
+      const revealed = [...prev.revealedPieces];
+      revealed[index] = true;
+
+      const score = Math.max(0, prev.score - REVEAL_PENALTY);
+      const done = revealed.every(Boolean);
 
       return {
         ...prev,
-        revealedPieces: newRevealed,
-        score: newScore,
-        isGameOver: allRevealed && !prev.isGameWon,
+        revealedPieces: revealed,
+        score,
+        isGameOver: done,
       };
     });
+  };
+
+  /* ===== REVEAL ALL ===== */
+  const revealAll = () => {
+    setGameState((prev) => ({
+      ...prev,
+      revealedPieces: Array(GRID_SIZE).fill(true),
+      isGameOver: true,
+    }));
   };
 
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        py: 6,
-        px: 2,
+        height: "100dvh",
+        width: "100vw",
+        overflow: "hidden",
+        background: "#222222ff",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {gameState.currentImage ? (
-        <Box sx={{ maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
-          <Typography
-            variant="h4"
-            gutterBottom
+      {/* ===== HEADER ===== */}
+      <Box sx={{ pt: 2, px: 2, textAlign: "center" }}>
+        <Typography variant="h6" sx={{ color: "white", fontWeight: 700 }}>
+          💰 เงินรางวัล: {gameState.score} บาท
+        </Typography>
+
+        <Stack
+          direction="row"
+          spacing={1}
+          justifyContent="center"
+          sx={{ mt: 1 }}
+        >
+          {/* ===== DROPDOWN ===== */}
+          <Select
+            size="small"
+            value={selectedImageId}
+            onChange={(e) => {
+              const id = e.target.value;
+              setSelectedImageId(id);
+              startGameWithImage(id);
+            }}
             sx={{
-              color: "white",
-              fontWeight: "bold",
-              textShadow: "2px 2px 8px rgba(0,0,0,0.4)",
-              mb: 4,
+              bgcolor: "white",
+              borderRadius: 1,
+              minWidth: 140,
             }}
           >
-            เงินรางวัล: {gameState.score} บาท ({GRID_SIZE} ช่อง)
-          </Typography>
+            {IMAGE_POOL.map((img) => (
+              <MenuItem key={img.id} value={img.id}>
+                {img.label}
+              </MenuItem>
+            ))}
+          </Select>
 
+          <Button
+            size="small"
+            variant="contained"
+            onClick={revealAll}
+            sx={{ bgcolor: "red", borderRadius: 3 }}
+          >
+            เฉลย
+          </Button>
+        </Stack>
+      </Box>
+
+      {/* ===== GRID AREA ===== */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 0.5,
+          position: "relative",
+          m: 3,
+        }}
+      >
+        {/* ===== GRID ===== */}
+        {gameState.currentImage && !isTransitioning && (
+          <Fade in timeout={200}>
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                maxWidth: "min(96vw, 96vh)",
+                maxHeight: "min(96vw, 96vh)",
+                display: "grid",
+                gridTemplateColumns: `repeat(${COLS}, 1fr)`,
+                gridTemplateRows: `repeat(${ROWS}, 1fr)`,
+                gap: "2px",
+                bgcolor: "rgba(255,255,255,0.2)",
+                borderRadius: 3,
+                overflow: "hidden",
+              }}
+            >
+              {gameState.revealedPieces.map((open, i) => (
+                <GridPiece
+                  key={i}
+                  index={i}
+                  isRevealed={open}
+                  imageSrc={gameState.currentImage.src}
+                  rows={ROWS}
+                  cols={COLS}
+                  onReveal={revealPiece}
+                  disabled={gameState.isGameOver}
+                />
+              ))}
+            </Box>
+          </Fade>
+        )}
+
+        {/* ===== OVERLAY (กันภาพแว้บ) ===== */}
+        {isTransitioning && (
           <Box
             sx={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${COLS}, 1fr)`,
-              gridTemplateRows: `repeat(${ROWS}, 1fr)`,
-              gap: "4px",
-              p: 2,
-              bgcolor: "rgba(255, 255, 255, 0.1)",
-              borderRadius: "24px",
-              backdropFilter: "blur(10px)",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
-              width: "100%",
-              maxWidth: { xs: "95vw", sm: "80vw", md: "750px", lg: "850px" },
-              aspectRatio: imageAspectRatio,
-              margin: "0 auto",
-              overflow: "hidden",
+              position: "absolute",
+              inset: 0,
+              bgcolor: "#222222ff",
+              zIndex: 10,
             }}
-          >
-            {gameState.revealedPieces.map((isRevealed, index) => (
-              <GridPiece
-                key={index}
-                index={index}
-                isRevealed={isRevealed}
-                imageSrc={gameState.currentImage.src}
-                rows={ROWS}
-                cols={COLS}
-                onReveal={revealPiece}
-                disabled={gameState.isGameWon || gameState.isGameOver}
-              />
-            ))}
-          </Box>
-        </Box>
-      ) : (
-        <Typography variant="h5" color="white" align="center">
-          เลือกหมวดหมู่เพื่อเริ่มเกม!
-        </Typography>
-      )}
+          />
+        )}
+      </Box>
     </Box>
   );
 };

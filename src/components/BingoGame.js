@@ -407,7 +407,7 @@ const BingoGame = ({ username, socket }) => {
                     backgroundColor: isBingo
                       ? "red"
                       : marked.includes(num)
-                      ? "#2563eb"
+                      ? "#21920dff"
                       : drawnNumbers.includes(num)
                       ? "#c7d2fe"
                       : "#f8fafc",

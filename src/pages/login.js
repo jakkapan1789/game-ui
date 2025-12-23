@@ -51,6 +51,16 @@ const GAME_IMAGES = [
   "/logos/microsoft-fake.png",
   "/logos/dog-real.png",
   "/logos/dog-fake.png",
+  "/logos/bgk-real.png",
+  "/logos/bgk-fake.png",
+  "/logos/google-drive.png",
+  "/logos/google-drive-fake.png",
+  "/logos/youtube.png",
+  "/logos/youtube-fake.png",
+  "/logos/gmail.png",
+  "/logos/gmail-fake.png",
+  "/logos/google-map.png",
+  "/logos/google-map-fake.png",
 ];
 export default function App() {
   const router = useRouter();

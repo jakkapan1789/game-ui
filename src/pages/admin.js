@@ -45,6 +45,11 @@ const LOGO_OPTIONS = [
   "Strong Cat",
   "Microsoft",
   "Dog",
+  "Burger King",
+  "Google Drive",
+  "Youtube",
+  "GMAIL",
+  "Google Map",
 ];
 
 const AdminPage = () => {
