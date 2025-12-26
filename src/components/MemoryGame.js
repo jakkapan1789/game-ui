@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Grid,
-  Box,
-  Card,
-  CardMedia,
-  Typography,
-  Dialog,
-  DialogContent,
-  Stack,
-} from "@mui/material";
+import { Grid, Box, Card, CardMedia, Typography, Stack } from "@mui/material";
 import { io } from "socket.io-client";
 import confetti from "canvas-confetti";
 
@@ -96,8 +87,16 @@ const MemoryGame = ({ username }) => {
     });
   };
 
+  // const handleCardClick = (id) => {
+  //   if (isChecking || flippedCards.includes(id) || cards[id].isMatched) return;
   const handleCardClick = (id) => {
-    if (isChecking || flippedCards.includes(id) || cards[id].isMatched) return;
+    if (
+      gameComplete || // ⭐ เพิ่มบรรทัดนี้
+      isChecking ||
+      flippedCards.includes(id) ||
+      cards[id].isMatched
+    )
+      return;
 
     const newFlippedCards = [...flippedCards, id];
     setFlippedCards(newFlippedCards);
@@ -203,6 +202,29 @@ const MemoryGame = ({ username }) => {
         </Stack>
       )}
 
+      {dialogOpen && (
+        <Box
+          sx={{
+            textAlign: "center",
+            justifyContent: "center",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <Typography variant="h1">{dialogEmoji}</Typography>
+
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            sx={{
+              color: dialogEmoji === "🥳" ? "success.main" : "error.main",
+            }}
+          >
+            {dialogMessage}
+          </Typography>
+        </Box>
+      )}
+
       {gameStarted && (
         <Grid
           container
@@ -249,42 +271,6 @@ const MemoryGame = ({ username }) => {
           ))}
         </Grid>
       )}
-
-      <Dialog
-        open={dialogOpen}
-        maxWidth="xs"
-        BackdropProps={{
-          sx: {
-            background:
-              "linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5))",
-            backdropFilter: "blur(15px)",
-          },
-        }}
-        PaperProps={{
-          sx: {
-            backgroundColor: "rgba(255, 255, 255, 1)",
-            p: 2,
-            border: "none",
-            borderRadius: 2,
-          },
-        }}
-      >
-        <DialogContent>
-          <Typography variant="h1" align="center">
-            {dialogEmoji}
-          </Typography>
-          <Typography
-            variant="h6"
-            align="center"
-            sx={{
-              fontWeight: "bold",
-              fontSize: "1.6rem",
-            }}
-          >
-            {dialogMessage}
-          </Typography>
-        </DialogContent>
-      </Dialog>
     </Box>
   );
 };

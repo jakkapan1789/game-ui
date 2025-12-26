@@ -113,11 +113,42 @@ export default function LogoQuizGame({ username, socket }) {
     "Strong Cat": "แมว",
   };
 
+  // const getInstructionText = () => {
+  //   if (!roundData) return "";
+
+  //   const brand = roundData.brand;
+  //   const isReal = roundData.correctType === "real";
+  //   const animalBrands = [
+  //     "Lion",
+  //     "Tiger",
+  //     "Cat",
+  //     "Dog",
+  //     "Zebra",
+  //     "Raccoon",
+  //     "Panda",
+  //     "Strong Cat",
+  //   ];
+
+  //   if (animalBrands.includes(brand)) {
+  //     const thaiName = animalNameMap[brand] || brand;
+  //     return isReal ? `ภาพไหนคือ ${thaiName} ?` : `ภาพไหนไม่ใช่ ${thaiName} ?`;
+  //   }
+
+  //   return isReal
+  //     ? `ภาพไหนคือโลโก้ของ ${brand} จริง?`
+  //     : `ภาพไหนคือโลโก้ของ ${brand} ปลอม?`;
+  // };
   const getInstructionText = () => {
     if (!roundData) return "";
 
     const brand = roundData.brand;
     const isReal = roundData.correctType === "real";
+
+    // ✅ case พิเศษ: Zebra
+    if (brand === "Zebra") {
+      return isReal ? "ภาพไหนคือ ม้าลาย ?" : "ภาพไหนคือ หมาลาย ?";
+    }
+
     const animalBrands = [
       "Lion",
       "Tiger",
@@ -265,53 +296,6 @@ export default function LogoQuizGame({ username, socket }) {
             </Box>
           )}
 
-          {/* <Grid
-            container
-            spacing={2}
-            justifyContent="center"
-            sx={{ mt: 1, px: 1 }}
-          >
-            {roundData.choices.map((c, index) => (
-              <Grid item xs={6} key={index}>
-                <Card
-                  onClick={() =>
-                    countdown > 0 &&
-                    selected !== "ANSWERED" &&
-                    setSelected(index)
-                  }
-                  sx={{
-                    p: 1,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: { xs: 180, md: 220 },
-                    border:
-                      selected === index
-                        ? "4px solid #3b82f6"
-                        : "2px solid transparent",
-                    cursor: countdown > 0 ? "pointer" : "not-allowed",
-                    opacity: countdown > 0 ? 1 : 0.4,
-                    borderRadius: 3,
-                    transition: "0.2s",
-                    transform: selected === index ? "scale(1.05)" : "scale(1)",
-                    boxShadow:
-                      selected === index
-                        ? "0 0 10px rgba(59,130,246,0.6)"
-                        : "0 2px 10px rgba(0,0,0,0.08)",
-                  }}
-                >
-                  <img
-                    src={c.image}
-                    style={{
-                      width: "90%",
-                      height: "80%",
-                      objectFit: "contain",
-                    }}
-                  />
-                </Card>
-              </Grid>
-            ))}
-          </Grid> */}
           <Grid
             container
             spacing={2}
